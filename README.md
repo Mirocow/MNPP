@@ -1,18 +1,20 @@
-#MNPP  Mac + Nginx + Percona + PHP
+#MNPP  Mac + Nginx + Percona + PHP + Sphinx + Memcached
 ###A high performance web server in a one-click installer.
 
 ## Contributors
 **This project is currently maintained by the following people:**    
 
 [Jair Gaxiola](https://github.com/jyr) (Core developer)    
-[Dmitry Demenchuk](https://github.com/mrded)    
-[César Salazar](http://cesarsalazar.mx/)    
+[Dmitry Demenchuk](https://github.com/mrded)    
+[César Salazar](http://cesarsalazar.mx/)
+[Mirocow](https://github.com/mirocow)    
 
 **Pull requests authors**
 
 [hmert](https://github.com/hmert)    
 [francescolaffi](https://github.com/francescolaffi)    
-[gnuget](https://github.com/gnuget)    
+[gnuget](https://github.com/gnuget)
+[mirocow](https://github.com/mirocow)     
 
 ##Features
 
@@ -33,7 +35,7 @@ Needs a update of php, percona or nginx? Only change the software version in boo
 
 After run
 
-	sudo sh /Applications/MNPP/provisions/bash/bootstrap.sh
+	sudo sh /Applications/MNPP/install.sh
 
 ##Set environment
 
@@ -46,7 +48,7 @@ MNPP by default only have mcrypt and gettext enabled, but if  you need more can 
 	
 	$ brew install autoconf
 
-Version: 52 | 53 | 54    
+Version: 52 | 53 | 54 | 55  
 
 	$ /Applications/MNPP/Library/php[VERSION]/bin/pecl install apc
 	
@@ -60,7 +62,7 @@ Only one service
 <pre><code>$ sudo mnpp [Service] [Option]</code></pre>
 For php    
 <pre><code>$sudo mnpp php [Option] [Version]</code></pre>
-Version: 52 | 53 | 54    
+Version: 52 | 53 | 54 | 55   
 Service: nginx | percona | php    
 Option: start | stop | restart    
 
