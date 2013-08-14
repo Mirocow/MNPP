@@ -220,7 +220,7 @@ __percona( ){
 			--ldata=$MNPP/Library/mysql/var/ \
 			--basedir=$MNPP/Library/mysql/
 
-		cp $MNPP/Library/mysql/lib/libmysqlclient.18.dylib $MNPP/Library/ -y
+		cp $MNPP/Library/mysql/lib/libmysqlclient.18.dylib $MNPP/Library
 	fi
 }
 
