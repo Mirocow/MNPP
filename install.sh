@@ -161,60 +161,64 @@ __essentials( ){
 
 __nginx( ) {
 
-	cd $SRC
+	if [ ! -d $MNPP/Library/nginx ]; then
+		cd $SRC
 
-	if [ ! -d $NGINX_FILE ]; then
-		wget -c "${PCRE_URL}${PCRE_FILE}.tar.gz"  && tar xvfz "${PCRE_FILE}.tar.gz"
-		wget -c  "${NGINX_URL}${NGINX_FILE}.tar.gz" && tar zxvf "${NGINX_FILE}.tar.gz"
+		if [ ! -d $NGINX_FILE ]; then
+			wget -c "${PCRE_URL}${PCRE_FILE}.tar.gz"  && tar xvfz "${PCRE_FILE}.tar.gz"
+			wget -c  "${NGINX_URL}${NGINX_FILE}.tar.gz" && tar zxvf "${NGINX_FILE}.tar.gz"
+		fi
+
+		cd $NGINX_FILE
+		./configure --prefix=$MNPP/Library/nginx \
+			--sbin-path=$MNPP/Library/nginx \
+			--conf-path=$MNPP/conf/nginx/nginx.conf \
+			--user=www --group=www --with-http_ssl_module \
+			--with-http_stub_status_module \
+			--pid-path=$MNPP/run/nginx \
+			--with-http_gzip_static_module \
+			--with-pcre=$SRC/$PCRE_FILE/
+
+		make && make install
 	fi
-
-	cd $NGINX_FILE
-	./configure --prefix=$MNPP/Library/nginx \
-		--sbin-path=$MNPP/Library/nginx \
-		--conf-path=$MNPP/conf/nginx/nginx.conf \
-		--user=www --group=www --with-http_ssl_module \
-		--with-http_stub_status_module \
-		--pid-path=$MNPP/run/nginx \
-		--with-http_gzip_static_module \
-		--with-pcre=$SRC/$PCRE_FILE/
-
-	make && make install
 }
 
 __percona( ){
 
-	cd $SRC
+	if [ ! -d $MNPP/Library/mysql ]; then
+		cd $SRC
 
-	if [ ! -d $PERCONA_FILE ]; then
-		wget -c "${PERCONA_URL}${PERCONA_FILE}.tar.gz"
-		tar -zxvf "${PERCONA_FILE}.tar.gz"
+		if [ ! -d $PERCONA_FILE ]; then
+			wget -c "${PERCONA_URL}${PERCONA_FILE}.tar.gz"
+			tar -zxvf "${PERCONA_FILE}.tar.gz"
+		fi
+
+		cd $PERCONA_FILE
+		BUILD/autorun.sh
+
+		CFLAGS="-arch i386 -arch x86_64 -O3 -fno-omit-frame-pointer" 
+		CXXFLAGS="-arch i386 -arch x86_64 -O3 -fno-omit-frame-pointer -felide-constructors -fno-exceptions -fno-rtti" 
+		./configure --prefix=$MNPP/Library/mysql \
+			--disable-dependency-tracking \
+			--with-extra-charsets=complex \
+			--enable-thread-safe-client \
+			--enable-local-infile \
+			--with-unix-socket-path=$MNPP/run/mysql/mysql.sock \
+			--with-charset=latin1 --with-collation=latin1_general_ci \
+			--with-mysqld-user=_mysql --enable-shared --with-plugins=all \
+			--datadir=$MNPP/Library/mysql/var/
+
+		make && make install
+		
+		mkdir $MNPP/Library/mysql/var
+		wget -c -O $MNPP/Library/mysql/my.cnf https://gist.github.com/jyr/5418650/raw/d6ea07a725aff419caaa1e3fcb5471cc3dff1a05/my.cnf
+		chown -R mysql:mysql $MNPP/Library/mysql
+
+		sh $SRC/$PERCONA_FILE/scripts/mysql_install_db.sh --user=mysql \
+			--ldata=$MNPP/Library/mysql/var/ --basedir=$MNPP/Library/mysql/
+
+		cp $MNPP/Library/mysql/lib/libmysqlclient.18.dylib $MNPP/Library/ -y
 	fi
-
-	cd $PERCONA_FILE
-	BUILD/autorun.sh
-
-	CFLAGS="-arch i386 -arch x86_64 -O3 -fno-omit-frame-pointer" 
-	CXXFLAGS="-arch i386 -arch x86_64 -O3 -fno-omit-frame-pointer -felide-constructors -fno-exceptions -fno-rtti" 
-	./configure --prefix=$MNPP/Library/mysql \
-		--disable-dependency-tracking \
-		--with-extra-charsets=complex \
-		--enable-thread-safe-client \
-		--enable-local-infile \
-		--with-unix-socket-path=$MNPP/run/mysql/mysql.sock \
-		--with-charset=latin1 --with-collation=latin1_general_ci \
-		--with-mysqld-user=_mysql --enable-shared --with-plugins=all \
-		--datadir=$MNPP/Library/mysql/var/
-
-	make && make install
-	
-	mkdir $MNPP/Library/mysql/var
-	wget -c -O $MNPP/Library/mysql/my.cnf https://gist.github.com/jyr/5418650/raw/d6ea07a725aff419caaa1e3fcb5471cc3dff1a05/my.cnf
-	chown -R mysql:mysql $MNPP/Library/mysql
-
-	sh $SRC/$PERCONA_FILE/scripts/mysql_install_db.sh --user=mysql \
-		--ldata=$MNPP/Library/mysql/var/ --basedir=$MNPP/Library/mysql/
-
-	cp $MNPP/Library/mysql/lib/libmysqlclient.18.dylib $MNPP/Library/ -y
 }
 
 __php( ){
@@ -225,129 +229,135 @@ __php( ){
 
 __php_54( ){
 
-	cd $SRC
+	if [ ! -d $MNPP/Library/php54 ]; then
+		cd $SRC
 
-	### PHP VERSION 5.4.*
+		### PHP VERSION 5.4.*
 
-	if [ ! -d "php-${PHP54_VERSION}" ]; then 
-		wget -c -O "${PHP54_FILE}.tar.gz" "${PHP54_URL}"
-		echo "${PHP54_FILE}.tar.gz ${PHP54_URL}"
-		tar xvfz "${PHP54_FILE}.tar.gz"
+		if [ ! -d "php-${PHP54_VERSION}" ]; then 
+			wget -c -O "${PHP54_FILE}.tar.gz" "${PHP54_URL}"
+			echo "${PHP54_FILE}.tar.gz ${PHP54_URL}"
+			tar xvfz "${PHP54_FILE}.tar.gz"
+		fi
+
+		cd "php-${PHP54_VERSION}"
+		./configure --prefix=$MNPP/Library/php54 \
+			--exec-prefix=$MNPP/Library/php54 --enable-cli \
+			--enable-gd-jis-conv --enable-gd-native-ttf --enable-mbstring \
+			--with-bz2 --with-curl --with-gd \
+			--with-gettext=shared,$MNPP/Library/gettext \
+			--with-freetype-dir=$MNPP/Library/freetype \
+			--with-jpeg-dir=$MNPP/Library/jpeg \
+			--with-libxml-dir=$MNPP/Library/xml \
+			--with-xsl=$MNPP/Library/xslt \
+			--with-mcrypt=shared,$MNPP/Library/mcrypt \
+			--with-mhash=$MNPP/Library/mhash \
+			--with-mysql=$MNPP/Library/mysql --enable-sockets \
+			--with-mysqli=$MNPP/Library/mysql/bin/mysql_config \
+			--with-openssl-dir=/usr/include/openssl \
+			--with-zlib-dir=$MNPP/Library/zlib \
+			--with-png-dir=$MNPP/Library/png --with-readline \
+			--with-zlib --with-config-file-path=$MNPP/conf/php54 \
+			--enable-fpm --with-fpm-user=www --with-fpm-group=www --with-libedit \
+			--enable-libxml --enable-dom --enable-simplexml \
+			--with-iconv=$MNPP/Library/iconv \
+			--with-pdo-mysql=$MNPP/Library/mysql/bin/mysql_config \
+			--enable-soap
+
+		export EXTRA_CFLAGS=-lresolv
+		export LC_ALL=en_US.UTF-8
+		make && make install
 	fi
-
-	cd "php-${PHP54_VERSION}"
-	./configure --prefix=$MNPP/Library/php54 \
-		--exec-prefix=$MNPP/Library/php54 --enable-cli \
-		--enable-gd-jis-conv --enable-gd-native-ttf --enable-mbstring \
-		--with-bz2 --with-curl --with-gd \
-		--with-gettext=shared,$MNPP/Library/gettext \
-		--with-freetype-dir=$MNPP/Library/freetype \
-		--with-jpeg-dir=$MNPP/Library/jpeg \
-		--with-libxml-dir=$MNPP/Library/xml \
-		--with-xsl=$MNPP/Library/xslt \
-		--with-mcrypt=shared,$MNPP/Library/mcrypt \
-		--with-mhash=$MNPP/Library/mhash \
-		--with-mysql=$MNPP/Library/mysql --enable-sockets \
-		--with-mysqli=$MNPP/Library/mysql/bin/mysql_config \
-		--with-openssl-dir=/usr/include/openssl \
-		--with-zlib-dir=$MNPP/Library/zlib \
-		--with-png-dir=$MNPP/Library/png --with-readline \
-		--with-zlib --with-config-file-path=$MNPP/conf/php54 \
-		--enable-fpm --with-fpm-user=www --with-fpm-group=www --with-libedit \
-		--enable-libxml --enable-dom --enable-simplexml \
-		--with-iconv=$MNPP/Library/iconv \
-		--with-pdo-mysql=$MNPP/Library/mysql/bin/mysql_config \
-		--enable-soap
-
-	export EXTRA_CFLAGS=-lresolv
-	export LC_ALL=en_US.UTF-8
-	make && make install
 }
 
 __php_53( ) {
 
-	cd $SRC
+	if [ ! -d $MNPP/Library/php53 ]; then
+		cd $SRC
 
-	### PHP VERSION 5.3.*
+		### PHP VERSION 5.3.*
 
-	if [ ! -d "php-${PHP53_VERSION}" ]; then 
-		wget -c -O "${PHP53_FILE}.tar.gz" "${PHP53_URL}"
-		tar xvfz "${PHP53_FILE}.tar.gz"
+		if [ ! -d "php-${PHP53_VERSION}" ]; then 
+			wget -c -O "${PHP53_FILE}.tar.gz" "${PHP53_URL}"
+			tar xvfz "${PHP53_FILE}.tar.gz"
+		fi
+
+		cd "php-${PHP53_VERSION}"
+		./configure --prefix=$MNPP/Library/php53 \
+			--exec-prefix=$MNPP/Library/php53 --enable-cli \
+			--enable-gd-jis-conv --enable-gd-native-ttf --enable-mbstring \
+			--with-bz2 --with-curl --with-gd=$MNPP/Library/gd \
+			--with-gettext=shared,$MNPP/Library/gettext \
+			--with-freetype-dir=$MNPP/Library/freetype \
+			--with-jpeg-dir=$MNPP/Library/jpeg \
+			--with-libxml-dir=$MNPP/Library/xml \
+			--with-xsl=$MNPP/Library/xslt \
+			--with-mcrypt=shared,$MNPP/Library/mcrypt \
+			--with-mhash=$MNPP/Library/mhash \
+			--with-mysql=$MNPP/Library/mysql \
+			--enable-sockets --with-mysqli=$MNPP/Library/mysql/bin/mysql_config \
+			--with-openssl-dir=/usr/include/openssl \
+			--with-zlib-dir=$MNPP/Library/zlib \
+			--with-png-dir=$MNPP/Library/png --with-readline --with-zlib \
+			--with-config-file-path=$MNPP/conf/php53 --enable-fpm \
+			--with-fpm-user=www --with-fpm-group=www --with-libedit --enable-libxml \
+			--enable-dom --enable-simplexml --with-iconv=$MNPP/Library/iconv \
+			--with-pdo-mysql=$MNPP/Library/mysql/bin/mysql_config --enable-soap
+
+		export EXTRA_CFLAGS=-lresolv
+		make && make install
 	fi
-
-	cd "php-${PHP53_VERSION}"
-	./configure --prefix=$MNPP/Library/php53 \
-		--exec-prefix=$MNPP/Library/php53 --enable-cli \
-		--enable-gd-jis-conv --enable-gd-native-ttf --enable-mbstring \
-		--with-bz2 --with-curl --with-gd=$MNPP/Library/gd \
-		--with-gettext=shared,$MNPP/Library/gettext \
-		--with-freetype-dir=$MNPP/Library/freetype \
-		--with-jpeg-dir=$MNPP/Library/jpeg \
-		--with-libxml-dir=$MNPP/Library/xml \
-		--with-xsl=$MNPP/Library/xslt \
-		--with-mcrypt=shared,$MNPP/Library/mcrypt \
-		--with-mhash=$MNPP/Library/mhash \
-		--with-mysql=$MNPP/Library/mysql \
-		--enable-sockets --with-mysqli=$MNPP/Library/mysql/bin/mysql_config \
-		--with-openssl-dir=/usr/include/openssl \
-		--with-zlib-dir=$MNPP/Library/zlib \
-		--with-png-dir=$MNPP/Library/png --with-readline --with-zlib \
-		--with-config-file-path=$MNPP/conf/php53 --enable-fpm \
-		--with-fpm-user=www --with-fpm-group=www --with-libedit --enable-libxml \
-		--enable-dom --enable-simplexml --with-iconv=$MNPP/Library/iconv \
-		--with-pdo-mysql=$MNPP/Library/mysql/bin/mysql_config --enable-soap
-
-	export EXTRA_CFLAGS=-lresolv
-	make && make install
 }
 
 __php_52( ) {
 
-	cd $SRC
+	if [ ! -d $MNPP/Library/php52 ]; then
+		cd $SRC
 
-	### PHP VERSION 5.2.*
+		### PHP VERSION 5.2.*
 
-	if [ ! -d "php-${PHP52_VERSION}" ]; then 
-		wget -c -O "${PHP52_FILE}.tar.gz" "${PHP52_URL}""php-${PHP52_VERSION}.tar.gz"
-		tar xvfz "${PHP52_FILE}.tar.gz" && cd "php-${PHP52_VERSION}"
-		wget -c http://php-fpm.org/downloads/php-5.2.17-fpm-0.5.14.diff.gz
-		gunzip php-5.2.17-fpm-0.5.14.diff.gz
-		patch -p1 < php-5.2.17-fpm-0.5.14.diff
+		if [ ! -d "php-${PHP52_VERSION}" ]; then 
+			wget -c -O "${PHP52_FILE}.tar.gz" "${PHP52_URL}""php-${PHP52_VERSION}.tar.gz"
+			tar xvfz "${PHP52_FILE}.tar.gz" && cd "php-${PHP52_VERSION}"
+			wget -c http://php-fpm.org/downloads/php-5.2.17-fpm-0.5.14.diff.gz
+			gunzip php-5.2.17-fpm-0.5.14.diff.gz
+			patch -p1 < php-5.2.17-fpm-0.5.14.diff
+		fi
+
+		cd "php-${PHP52_VERSION}"
+		./configure --prefix=$MNPP/Library/php52 \
+			--exec-prefix=$MNPP/Library/php52 \
+			--enable-cli --enable-gd-jis-conv --enable-gd-native-ttf \
+			--enable-mbstring --with-bz2 --with-curl=$MNPP/Library/curl \
+			--with-gd=$MNPP/Library/gd \
+			--with-gettext=shared,$MNPP/Library/gettext \
+			--with-freetype-dir=$MNPP/Library/freetype \
+			--with-jpeg-dir=$MNPP/Library/jpeg \
+			--with-libxml-dir=$MNPP/Library/xml \
+			--with-xsl=$MNPP/Library/xslt \
+			--with-mcrypt=shared,$MNPP/Library/mcrypt \
+			--with-mhash=$MNPP/Library/mhash \
+			--with-mysql=$MNPP/Library/mysql --enable-sockets \
+			--with-mysqli=$MNPP/Library/mysql/bin/mysql_config \
+			--with-openssl-dir=/usr/include/openssl \
+			--with-png-dir=$MNPP/Library/png --with-readline --with-ttf \
+			--with-zlib --with-config-file-path=$MNPP/conf/php52 \
+			--enable-fastcgi --enable-fpm --enable-force-cgi-redirect \
+			--with-fpm-conf=$MNPP/conf/php52/php-fpm \
+			--with-fpm-log=$MNPP/logs/php52/php-fpm.log \
+			--with-fpm-pid=$MNPP/run/php52/php-fpm.pid --with-libedit \
+			--enable-libxml --enable-dom --with-ncurses=/usr/lib --enable-pdo \
+			--with-pcre-regex --enable-hash --enable-session --enable-json --enable-spl \
+			--enable-filter --enable-simplexml --enable-xml \
+			--with-iconv=$MNPP/Library/iconv --enable-soap
+
+		make && make install
 	fi
-
-	cd "php-${PHP52_VERSION}"
-	./configure --prefix=$MNPP/Library/php52 \
-		--exec-prefix=$MNPP/Library/php52 \
-		--enable-cli --enable-gd-jis-conv --enable-gd-native-ttf \
-		--enable-mbstring --with-bz2 --with-curl=$MNPP/Library/curl \
-		--with-gd=$MNPP/Library/gd \
-		--with-gettext=shared,$MNPP/Library/gettext \
-		--with-freetype-dir=$MNPP/Library/freetype \
-		--with-jpeg-dir=$MNPP/Library/jpeg \
-		--with-libxml-dir=$MNPP/Library/xml \
-		--with-xsl=$MNPP/Library/xslt \
-		--with-mcrypt=shared,$MNPP/Library/mcrypt \
-		--with-mhash=$MNPP/Library/mhash \
-		--with-mysql=$MNPP/Library/mysql --enable-sockets \
-		--with-mysqli=$MNPP/Library/mysql/bin/mysql_config \
-		--with-openssl-dir=/usr/include/openssl \
-		--with-png-dir=$MNPP/Library/png --with-readline --with-ttf \
-		--with-zlib --with-config-file-path=$MNPP/conf/php52 \
-		--enable-fastcgi --enable-fpm --enable-force-cgi-redirect \
-		--with-fpm-conf=$MNPP/conf/php52/php-fpm \
-		--with-fpm-log=$MNPP/logs/php52/php-fpm.log \
-		--with-fpm-pid=$MNPP/run/php52/php-fpm.pid --with-libedit \
-		--enable-libxml --enable-dom --with-ncurses=/usr/lib --enable-pdo \
-		--with-pcre-regex --enable-hash --enable-session --enable-json --enable-spl \
-		--enable-filter --enable-simplexml --enable-xml \
-		--with-iconv=$MNPP/Library/iconv --enable-soap
-
-	make && make install
 
 }
 
-__memcahed( ) {
-	sudo port install memcahed
+__memcached( ) {
+	sudo port install memcached
 }
 
 __compile_libs( ) {
@@ -359,16 +369,18 @@ __compile_libs( ) {
 	OPTIONS="${6}"
 	FLAGS="${7}"
 	
-	cd $SRC
+	if [ ! -d MNPP/Library/$LIB_NAME ]; then
+		cd $SRC
 
-	if [ ! -d $SOURCE ]; then
-		wget -c -O "${SOURCE}.tar.gz" "${URL}${FILE}.tar.gz"
-		tar -zxvf "${SOURCE}.tar.gz"
+		if [ ! -d $SOURCE ]; then
+			wget -c -O "${SOURCE}.tar.gz" "${URL}${FILE}.tar.gz"
+			tar -zxvf "${SOURCE}.tar.gz"
+		fi
+
+		cd $SOURCE
+		$FLAGS ./configure --prefix=$MNPP/Library/$LIB_NAME $OPTIONS
+		make &&	make install
 	fi
-
-	cd $SOURCE
-	$FLAGS ./configure --prefix=$MNPP/Library/$LIB_NAME $OPTIONS
-	make &&	make install
 }
 
 __jpeg( ) {
