@@ -4,14 +4,14 @@
 ## Contributors
 **This project is currently maintained by the following people:**    
 
-[Jair Gaxiola](https://github.com/jyr) (Core developer),    
-[Dmitry Demenchuk](https://github.com/mrded),    
-[César Salazar](http://cesarsalazar.mx/),    
-[Mirocow](https://github.com/mirocow),    
+[Jair Gaxiola](https://github.com/jyr) (Core developer)    
+[Dmitry Demenchuk](https://github.com/mrded)    
+[César Salazar](http://cesarsalazar.mx/)    
+[Mirocow](https://github.com/mirocow)    
 
 **Pull requests authors**
 
-[hmert](https://github.com/hmert),    
+[hmert](https://github.com/hmert)    
 [francescolaffi](https://github.com/francescolaffi)    
 [gnuget](https://github.com/gnuget)    
 [mirocow](https://github.com/mirocow)     

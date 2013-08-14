@@ -1,6 +1,6 @@
 #!/bin/sh
 
-MNPP='$MNPP'
+MNPP='/Applications/MNPP'
 
 export DYLD_LIBRARY_PATH=$MNPP/init:$MNPP/Library:$DYLD_LIBRARY_PATH
 
@@ -32,10 +32,6 @@ __initialize( ){
 	
 	__sources
 	__dependencies
-}
-
-__prepaire( ){
-	sudo port install wget
 }
 
 __sources( ){
@@ -164,9 +160,15 @@ __essentials( ){
 }
 
 __nginx( ) {
-	wget -c "${PCRE_URL}${PCRE_FILE}.tar.gz"  && tar xvfz "${PCRE_FILE}.tar.gz"
-	wget -c  "${NGINX_URL}${NGINX_FILE}.tar.gz" && tar zxvf "${NGINX_FILE}.tar.gz" && cd "${NGINX_FILE}"
 
+	cd $SRC
+
+	if [ ! -d $NGINX_FILE ]; then
+		wget -c "${PCRE_URL}${PCRE_FILE}.tar.gz"  && tar xvfz "${PCRE_FILE}.tar.gz"
+		wget -c  "${NGINX_URL}${NGINX_FILE}.tar.gz" && tar zxvf "${NGINX_FILE}.tar.gz"
+	fi
+
+	cd $NGINX_FILE
 	./configure --prefix=$MNPP/Library/nginx \
 		--sbin-path=$MNPP/Library/nginx \
 		--conf-path=$MNPP/conf/nginx/nginx.conf \
@@ -181,8 +183,13 @@ __nginx( ) {
 
 __percona( ){
 
-	wget -c "${PERCONA_URL}${PERCONA_FILE}.tar.gz"
-	tar -zxvf "${PERCONA_FILE}.tar.gz"
+	cd $SRC
+
+	if [ ! -d $PERCONA_FILE ]; then
+		wget -c "${PERCONA_URL}${PERCONA_FILE}.tar.gz"
+		tar -zxvf "${PERCONA_FILE}.tar.gz"
+	fi
+
 	cd $PERCONA_FILE
 	BUILD/autorun.sh
 
@@ -193,7 +200,7 @@ __percona( ){
 		--with-extra-charsets=complex \
 		--enable-thread-safe-client \
 		--enable-local-infile \
-		--with-unix-socket-path=$MNPP/tmp/mysql/mysql.sock \
+		--with-unix-socket-path=$MNPP/run/mysql/mysql.sock \
 		--with-charset=latin1 --with-collation=latin1_general_ci \
 		--with-mysqld-user=_mysql --enable-shared --with-plugins=all \
 		--datadir=$MNPP/Library/mysql/var/
@@ -207,7 +214,7 @@ __percona( ){
 	sh $MNPP/src/$PERCONA_FILE/scripts/mysql_install_db.sh --user=mysql \
 		--ldata=$MNPP/Library/mysql/var/ --basedir=$MNPP/Library/mysql/
 
-	cp $MNPP/Library/mysql/lib/libmysqlclient.18.dylib $MNPP/Library/
+	cp $MNPP/Library/mysql/lib/libmysqlclient.18.dylib $MNPP/Library/ -y
 }
 
 __php( ){
@@ -218,12 +225,17 @@ __php( ){
 
 __php_54( ){
 
+	cd $SRC
+
 	### PHP VERSION 5.4.*
 
-	wget -c -O "${PHP54_FILE}.tar.gz" "${PHP54_URL}"
-	echo "${PHP54_FILE}.tar.gz ${PHP54_URL}"
-	tar xvfz "${PHP54_FILE}.tar.gz" && cd "php-${PHP54_VERSION}"
+	if [ ! -d "php-${PHP54_VERSION}" ]; then 
+		wget -c -O "${PHP54_FILE}.tar.gz" "${PHP54_URL}"
+		echo "${PHP54_FILE}.tar.gz ${PHP54_URL}"
+		tar xvfz "${PHP54_FILE}.tar.gz"
+	fi
 
+	cd "php-${PHP54_VERSION}"
 	./configure --prefix=$MNPP/Library/php54 \
 		--exec-prefix=$MNPP/Library/php54 --enable-cli \
 		--enable-gd-jis-conv --enable-gd-native-ttf --enable-mbstring \
@@ -254,11 +266,16 @@ __php_54( ){
 
 __php_53( ) {
 
+	cd $SRC
+
 	### PHP VERSION 5.3.*
 
-	wget -c -O "${PHP53_FILE}.tar.gz" "${PHP53_URL}"
-	tar xvfz "${PHP53_FILE}.tar.gz" && cd "php-${PHP53_VERSION}"
+	if [ ! -d "php-${PHP53_VERSION}" ]; then 
+		wget -c -O "${PHP53_FILE}.tar.gz" "${PHP53_URL}"
+		tar xvfz "${PHP53_FILE}.tar.gz"
+	fi
 
+	cd "php-${PHP53_VERSION}"
 	./configure --prefix=$MNPP/Library/php53 \
 		--exec-prefix=$MNPP/Library/php53 --enable-cli \
 		--enable-gd-jis-conv --enable-gd-native-ttf --enable-mbstring \
@@ -286,14 +303,19 @@ __php_53( ) {
 
 __php_52( ) {
 
+	cd $SRC
+
 	### PHP VERSION 5.2.*
 
-	wget -c -O "${PHP52_FILE}.tar.gz" "${PHP52_URL}""php-${PHP52_VERSION}.tar.gz"
-	tar xvfz "${PHP52_FILE}.tar.gz" && cd "php-${PHP52_VERSION}"
-	wget -c http://php-fpm.org/downloads/php-5.2.17-fpm-0.5.14.diff.gz
-	gunzip php-5.2.17-fpm-0.5.14.diff.gz
-	patch -p1 < php-5.2.17-fpm-0.5.14.diff
+	if [ ! -d "php-${PHP52_VERSION}" ]; then 
+		wget -c -O "${PHP52_FILE}.tar.gz" "${PHP52_URL}""php-${PHP52_VERSION}.tar.gz"
+		tar xvfz "${PHP52_FILE}.tar.gz" && cd "php-${PHP52_VERSION}"
+		wget -c http://php-fpm.org/downloads/php-5.2.17-fpm-0.5.14.diff.gz
+		gunzip php-5.2.17-fpm-0.5.14.diff.gz
+		patch -p1 < php-5.2.17-fpm-0.5.14.diff
+	fi
 
+	cd "php-${PHP52_VERSION}"
 	./configure --prefix=$MNPP/Library/php52 \
 		--exec-prefix=$MNPP/Library/php52 \
 		--enable-cli --enable-gd-jis-conv --enable-gd-native-ttf \
@@ -314,7 +336,7 @@ __php_52( ) {
 		--enable-fastcgi --enable-fpm --enable-force-cgi-redirect \
 		--with-fpm-conf=$MNPP/conf/php52/php-fpm \
 		--with-fpm-log=$MNPP/logs/php52/php-fpm.log \
-		--with-fpm-pid=$MNPP/tmp/php52/php-fpm.pid --with-libedit \
+		--with-fpm-pid=$MNPP/run/php52/php-fpm.pid --with-libedit \
 		--enable-libxml --enable-dom --with-ncurses=/usr/lib --enable-pdo \
 		--with-pcre-regex --enable-hash --enable-session --enable-json --enable-spl \
 		--enable-filter --enable-simplexml --enable-xml \
@@ -322,6 +344,10 @@ __php_52( ) {
 
 	make && make install
 
+}
+
+__memcahed( ) {
+	sudo port install memcahed
 }
 
 __compile_libs( ) {
@@ -333,8 +359,14 @@ __compile_libs( ) {
 	OPTIONS="${6}"
 	FLAGS="${7}"
 	
-	wget -c -O "${SOURCE}.tar.gz" "${URL}${FILE}.tar.gz"
-	tar -zxvf "${SOURCE}.tar.gz" && cd "${SOURCE}"
+	cd $SRC
+
+	if [ ! -d $SOURCE ]; then
+		wget -c -O "${SOURCE}.tar.gz" "${URL}${FILE}.tar.gz"
+		tar -zxvf "${SOURCE}.tar.gz"
+	fi
+
+	cd $SOURCE
 	$FLAGS ./configure --prefix=$MNPP/Library/$LIB_NAME $OPTIONS
 	make &&	make install
 }
@@ -406,4 +438,5 @@ __initialize
 __nginx
 __percona
 __php
+__memcached
 __reset
