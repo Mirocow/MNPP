@@ -176,7 +176,7 @@ __nginx( ) {
 		--with-http_stub_status_module \
 		--pid-path=$MNPP/run/nginx \
 		--with-http_gzip_static_module \
-		--with-pcre=$MNPP/src/$PCRE_FILE/
+		--with-pcre=$SRC/$PCRE_FILE/
 
 	make && make install
 }
@@ -211,7 +211,7 @@ __percona( ){
 	wget -c -O $MNPP/Library/mysql/my.cnf https://gist.github.com/jyr/5418650/raw/d6ea07a725aff419caaa1e3fcb5471cc3dff1a05/my.cnf
 	chown -R mysql:mysql $MNPP/Library/mysql
 
-	sh $MNPP/src/$PERCONA_FILE/scripts/mysql_install_db.sh --user=mysql \
+	sh $SRC/$PERCONA_FILE/scripts/mysql_install_db.sh --user=mysql \
 		--ldata=$MNPP/Library/mysql/var/ --basedir=$MNPP/Library/mysql/
 
 	cp $MNPP/Library/mysql/lib/libmysqlclient.18.dylib $MNPP/Library/ -y
