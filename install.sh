@@ -52,9 +52,9 @@ __sources( ){
 	JPEG_SOURCE="jpeg-${JPEG_VERSION}"
 	JPEG_OPTIONS="--enable-shared --enable-static"
 
-	PNG_URL='http://downloads.sourceforge.net/project/libpng/libpng16/1.6.1/'
-	PNG_FILE='libpng-1.6.1'
-	PNG_VERSION='1.6.1'
+	PNG_URL='http://downloads.sourceforge.net/project/libpng/libpng16/1.6.3/'
+	PNG_FILE='libpng-1.6.3'
+	PNG_VERSION='1.6.3'
 	PNG_FLAGS=""
 	PNG_SOURCE="${PNG_FILE}"
 	PNG_OPTIONS=""
@@ -204,18 +204,21 @@ __percona( ){
 			--enable-thread-safe-client \
 			--enable-local-infile \
 			--with-unix-socket-path=$MNPP/run/mysql/mysql.sock \
-			--with-charset=latin1 --with-collation=latin1_general_ci \
-			--with-mysqld-user=_mysql --enable-shared --with-plugins=all \
+			--with-charset=latin1 \
+			--with-collation=latin1_general_ci \
+			--with-mysqld-user=_mysql \
+			--enable-shared \
+			--with-plugins=all \
 			--datadir=$MNPP/Library/mysql/var/
 
 		make && make install
 		
 		mkdir $MNPP/Library/mysql/var
-		wget -c -O $MNPP/Library/mysql/my.cnf https://gist.github.com/jyr/5418650/raw/d6ea07a725aff419caaa1e3fcb5471cc3dff1a05/my.cnf
 		chown -R mysql:mysql $MNPP/Library/mysql
 
 		sh $SRC/$PERCONA_FILE/scripts/mysql_install_db.sh --user=mysql \
-			--ldata=$MNPP/Library/mysql/var/ --basedir=$MNPP/Library/mysql/
+			--ldata=$MNPP/Library/mysql/var/ \
+			--basedir=$MNPP/Library/mysql/
 
 		cp $MNPP/Library/mysql/lib/libmysqlclient.18.dylib $MNPP/Library/ -y
 	fi
@@ -369,7 +372,7 @@ __compile_libs( ) {
 	OPTIONS="${6}"
 	FLAGS="${7}"
 	
-	if [ ! -d MNPP/Library/$LIB_NAME ]; then
+	if [ ! -d $MNPP/Library/$LIB_NAME ]; then
 		cd $SRC
 
 		if [ ! -d $SOURCE ]; then
