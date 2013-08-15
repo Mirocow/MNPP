@@ -8,23 +8,33 @@ __show_usage( ) {
   exit 3
 }
 
-__set_privilegies( ) {
-   chown -R mysql:mysql /Applications/MNPP/tmp/mysql
-   chown -R mysql:mysql /Applications/MNPP/Library/mysql
-   chmod -R 755 /Applications/MNPP/Library/mysql/*
-   chmod 644 /Applications/MNPP/Library/mysql/my.cnf
+__set_privilegies( ) { 
+   sudo chown -R mysql:mysql /Applications/MNPP/run/mysql
+   sudo chown -R mysql:mysql /Applications/MNPP/Library/mysql
+   sudo chmod -R 755 /Applications/MNPP/Library/mysql/*
+   sudo chmod 644 /Applications/MNPP/conf/mysql/my.cnf
+   sudo rm /Applications/MNPP/Library/mysql/my.cnf
+   sudo ln -s /Applications/MNPP/conf/mysql/my.cnf /Applications/MNPP/Library/mysql/my.cnf
+}
+
+__start( ){
+  __set_privilegies
+  /Applications/MNPP/Library/mysql/support-files/mysql.server start  
+}
+
+__stop( ){
+  /Applications/MNPP/Library/mysql/support-files/mysql.server stop  
 }
 
 case "${1}" in
     start)
-	__set_privilegies
-	/Applications/MNPP/Library/mysql/support-files/mysql.server start
+          __start
         ;;
     stop)
-	/Applications/MNPP/Library/mysql/support-files/mysql.server stop
+          __stop
         ;;
     restart)
-	/Applications/MNPP/Library/mysql/support-files/mysql.server restart
+          __stop && __start
         ;;
     *)
         __show_usage

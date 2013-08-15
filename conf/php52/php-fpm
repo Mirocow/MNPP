@@ -6,7 +6,7 @@
 	<section name="global_options">
 
 		Pid file
-		<value name="pid_file">/Applications/MNPP/tmp/php52/php-fpm.pid</value>
+		<value name="pid_file">/Applications/MNPP/run/php52-php-fpm.pid</value>
 
 		Error log file
 		<value name="error_log">/Applications/MNPP/logs/php52/php-fpm.log</value>

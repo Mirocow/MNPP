@@ -2,7 +2,7 @@
 
 MNPP='/Applications/MNPP'
 
-export DYLD_LIBRARY_PATH=$MNPP/init:$MNPP/Library:$DYLD_LIBRARY_PATH
+export DYLD_LIBRARY_PATH=$MNPP/init:$MNPP/Library/lib:$DYLD_LIBRARY_PATH
 
 __initialize( ){
 	
@@ -173,9 +173,10 @@ __nginx( ) {
 		./configure --prefix=$MNPP/Library/nginx \
 			--sbin-path=$MNPP/Library/nginx \
 			--conf-path=$MNPP/conf/nginx/nginx.conf \
-			--user=www --group=www --with-http_ssl_module \
+			--user=www --group=www \
+			--with-http_ssl_module \
 			--with-http_stub_status_module \
-			--pid-path=$MNPP/run/nginx \
+			--pid-path=$MNPP/run/nginx.pid \
 			--with-http_gzip_static_module \
 			--with-pcre=$SRC/$PCRE_FILE/
 
@@ -203,7 +204,7 @@ __percona( ){
 			--with-extra-charsets=complex \
 			--enable-thread-safe-client \
 			--enable-local-infile \
-			--with-unix-socket-path=$MNPP/run/mysql/mysql.sock \
+			--with-unix-socket-path=$MNPP/run/mysql.sock \
 			--with-charset=latin1 \
 			--with-collation=latin1_general_ci \
 			--with-mysqld-user=_mysql \
@@ -216,11 +217,12 @@ __percona( ){
 		mkdir $MNPP/Library/mysql/var
 		chown -R mysql:mysql $MNPP/Library/mysql
 
-		sh $SRC/$PERCONA_FILE/scripts/mysql_install_db.sh --user=mysql \
+		sh $SRC/$PERCONA_FILE/scripts/mysql_install_db.sh \
+			--user=mysql \
 			--ldata=$MNPP/Library/mysql/var/ \
-			--basedir=$MNPP/Library/mysql/
+			--basedir=$MNPP/Library/mysql
 
-		cp $MNPP/Library/mysql/lib/libmysqlclient.18.dylib $MNPP/Library
+		ln -s $MNPP/Library/mysql/lib/libmysqlclient.18.dylib $MNPP/Library/lib
 	fi
 }
 
@@ -245,9 +247,14 @@ __php_54( ){
 
 		cd "php-${PHP54_VERSION}"
 		./configure --prefix=$MNPP/Library/php54 \
-			--exec-prefix=$MNPP/Library/php54 --enable-cli \
-			--enable-gd-jis-conv --enable-gd-native-ttf --enable-mbstring \
-			--with-bz2 --with-curl --with-gd \
+			--exec-prefix=$MNPP/Library/php54 \
+			--enable-cli \
+			--enable-gd-jis-conv \
+			--enable-gd-native-ttf \
+			--enable-mbstring \
+			--with-bz2 \
+			--with-curl \
+			--with-gd \
 			--with-gettext=shared,$MNPP/Library/gettext \
 			--with-freetype-dir=$MNPP/Library/freetype \
 			--with-jpeg-dir=$MNPP/Library/jpeg \
@@ -255,13 +262,22 @@ __php_54( ){
 			--with-xsl=$MNPP/Library/xslt \
 			--with-mcrypt=shared,$MNPP/Library/mcrypt \
 			--with-mhash=$MNPP/Library/mhash \
-			--with-mysql=$MNPP/Library/mysql --enable-sockets \
+			--with-mysql=$MNPP/Library/mysql \
+			--enable-sockets \
 			--with-mysqli=$MNPP/Library/mysql/bin/mysql_config \
 			--with-openssl-dir=/usr/include/openssl \
 			--with-zlib-dir=$MNPP/Library/zlib \
-			--with-png-dir=$MNPP/Library/png --with-readline \
-			--with-zlib --with-config-file-path=$MNPP/conf/php54 \
-			--enable-fpm --with-fpm-user=www --with-fpm-group=www --with-libedit \
+			--with-png-dir=$MNPP/Library/png \
+			--with-readline \
+			--with-zlib \
+			--with-config-file-path=$MNPP/conf/php54 \
+			--enable-fpm \
+			--with-fpm-conf=$MNPP/conf/php54/php-fpm \
+			--with-fpm-log=$MNPP/logs/php54/php-fpm.log \
+			--with-fpm-pid=$MNPP/run/php54-php-fpm.pid \			
+			--with-fpm-user=www \
+			--with-fpm-group=www \
+			--with-libedit \
 			--enable-libxml --enable-dom --enable-simplexml \
 			--with-iconv=$MNPP/Library/iconv \
 			--with-pdo-mysql=$MNPP/Library/mysql/bin/mysql_config \
@@ -287,9 +303,14 @@ __php_53( ) {
 
 		cd "php-${PHP53_VERSION}"
 		./configure --prefix=$MNPP/Library/php53 \
-			--exec-prefix=$MNPP/Library/php53 --enable-cli \
-			--enable-gd-jis-conv --enable-gd-native-ttf --enable-mbstring \
-			--with-bz2 --with-curl --with-gd=$MNPP/Library/gd \
+			--exec-prefix=$MNPP/Library/php53 \
+			--enable-cli \
+			--enable-gd-jis-conv \
+			--enable-gd-native-ttf \
+			--enable-mbstring \
+			--with-bz2 \
+			--with-curl \
+			--with-gd=$MNPP/Library/gd \
 			--with-gettext=shared,$MNPP/Library/gettext \
 			--with-freetype-dir=$MNPP/Library/freetype \
 			--with-jpeg-dir=$MNPP/Library/jpeg \
@@ -298,14 +319,21 @@ __php_53( ) {
 			--with-mcrypt=shared,$MNPP/Library/mcrypt \
 			--with-mhash=$MNPP/Library/mhash \
 			--with-mysql=$MNPP/Library/mysql \
-			--enable-sockets --with-mysqli=$MNPP/Library/mysql/bin/mysql_config \
+			--enable-sockets \
+			--with-mysqli=$MNPP/Library/mysql/bin/mysql_config \
 			--with-openssl-dir=/usr/include/openssl \
 			--with-zlib-dir=$MNPP/Library/zlib \
-			--with-png-dir=$MNPP/Library/png --with-readline --with-zlib \
-			--with-config-file-path=$MNPP/conf/php53 --enable-fpm \
+			--with-png-dir=$MNPP/Library/png \
+			--with-readline --with-zlib \
+			--with-config-file-path=$MNPP/conf/php53 \
+			--enable-fpm \
+			--with-fpm-conf=$MNPP/conf/php53/php-fpm \
+			--with-fpm-log=$MNPP/logs/php53/php-fpm.log \
+			--with-fpm-pid=$MNPP/run/php53-php-fpm.pid \			
 			--with-fpm-user=www --with-fpm-group=www --with-libedit --enable-libxml \
 			--enable-dom --enable-simplexml --with-iconv=$MNPP/Library/iconv \
-			--with-pdo-mysql=$MNPP/Library/mysql/bin/mysql_config --enable-soap
+			--with-pdo-mysql=$MNPP/Library/mysql/bin/mysql_config \
+			--enable-soap
 
 		export EXTRA_CFLAGS=-lresolv
 		make && make install
@@ -330,8 +358,10 @@ __php_52( ) {
 		cd "php-${PHP52_VERSION}"
 		./configure --prefix=$MNPP/Library/php52 \
 			--exec-prefix=$MNPP/Library/php52 \
-			--enable-cli --enable-gd-jis-conv --enable-gd-native-ttf \
-			--enable-mbstring --with-bz2 --with-curl=$MNPP/Library/curl \
+			--enable-cli --enable-gd-jis-conv \
+			--enable-gd-native-ttf \
+			--enable-mbstring --with-bz2 \
+			--with-curl \
 			--with-gd=$MNPP/Library/gd \
 			--with-gettext=shared,$MNPP/Library/gettext \
 			--with-freetype-dir=$MNPP/Library/freetype \
@@ -348,9 +378,11 @@ __php_52( ) {
 			--enable-fastcgi --enable-fpm --enable-force-cgi-redirect \
 			--with-fpm-conf=$MNPP/conf/php52/php-fpm \
 			--with-fpm-log=$MNPP/logs/php52/php-fpm.log \
-			--with-fpm-pid=$MNPP/run/php52/php-fpm.pid --with-libedit \
+			--with-fpm-pid=$MNPP/run/php52-php-fpm.pid \
+			--with-libedit \
 			--enable-libxml --enable-dom --with-ncurses=/usr/lib --enable-pdo \
-			--with-pcre-regex --enable-hash --enable-session --enable-json --enable-spl \
+			--with-pcre-regex --enable-hash --enable-session \
+			--enable-json --enable-spl \
 			--enable-filter --enable-simplexml --enable-xml \
 			--with-iconv=$MNPP/Library/iconv --enable-soap
 
@@ -445,8 +477,34 @@ __dependencies( ){
 }
 
 __reset( ){
+	
 	chown -R $SUDO_USER $MNPP/Library
 	chown -R mysql:mysql $MNPP/Library/mysql
+
+	if [ ! -d $MNPP/logs/nginx ]; then
+		mkdir $MNPP/logs/nginx
+		chown -R _www:_www $MNPP/logs/nginx
+	fi
+
+	if [ ! -d $MNPP/logs/php52 ]; then
+		mkdir $MNPP/logs/php52
+		chown -R _www:_www $MNPP/logs/php52
+	fi
+
+	if [ ! -d $MNPP/logs/php53 ]; then
+		mkdir $MNPP/logs/php53
+		chown -R _www:_www $MNPP/logs/php53
+	fi
+
+	if [ ! -d $MNPP/logs/php54 ]; then
+		mkdir $MNPP/logs/php54
+		chown -R _www:_www $MNPP/logs/php54
+	fi		
+
+	if [ ! -d $MNPP/logs/mysql ]; then
+		mkdir $MNPP/logs/mysql
+		chown -R mysql:mysql $MNPP/logs/mysql
+	fi		
 }
 
 __initialize

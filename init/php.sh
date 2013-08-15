@@ -17,7 +17,7 @@ fi
 prefix=/Applications/MNPP/Library/php$1
 exec_prefix=${prefix} 
 php_fpm_BIN=${exec_prefix}/sbin/php-fpm
-php_fpm_PID=/Applications/MNPP/run/php-fpm.pid
+php_fpm_PID=/Applications/MNPP/run/php$1/php-fpm.pid
 
 php_opts="--fpm-config $php_fpm_CONF"
  
@@ -50,13 +50,6 @@ wait_for_pid () {
  
 }
 
-__set_privilegies( ) {
-   chown -R mysql:mysql /Applications/MNPP/tmp/mysql
-   chown -R mysql:mysql /Applications/MNPP/Library/mysql
-   chmod -R 755 /Applications/MNPP/Library/mysql/*
-   chmod 644 /Applications/MNPP/Library/mysql/my.cnf
-}
-
 __hosts( ){
   sh /Applications/MNPP/init/hosts.sh --add mnpp.local
   sh /Applications/MNPP/init/hosts.sh --add phpmyadmin.local
@@ -66,13 +59,6 @@ __export_library( ){
 	touch /Users/$SUDO_USER/.bash_profile
 	found=`cat /Users/$SUDO_USER/.bash_profile | grep MNPP | wc -l`
 	export DYLD_LIBRARY_PATH=/Applications/MNPP/init:/Applications/MNPP/Library/lib:$DYLD_LIBRARY_PATH
-	
-  	if [ $found = 0 ] ; then
-		echo "alias drush='/Applications/MNPP/Library/php54/bin/php /Applications/MNPP/Library/drush/drush.php'" >> /Users/$SUDO_USER/.bash_profile
-		echo "export PATH=/Applications/MNPP/init:/Applications/MNPP/Library/php54/bin:/Applications/MNPP/Library/mysql/bin:\$PATH" >> /Users/$SUDO_USER/.bash_profile
-		echo "alias mysql='/Applications/MNPP/Library/mysql/bin/mysql --socket=/Applications/MNPP/tmp/mysql/mysql.sock'" >> /Users/$SUDO_USER/.bash_profile
-		echo "export DYLD_LIBRARY_PATH=/Applications/MNPP/init:/Applications/MNPP/Library/lib:$DYLD_LIBRARY_PATH" >> /Users/$SUDO_USER/.bash_profile
-  	fi
 }
 
 __show_usage( ) {
@@ -81,7 +67,7 @@ __show_usage( ) {
   exit 1
 }
 
-__set_privilegies
+#__set_privilegies
 __hosts
 __export_library
 
@@ -154,8 +140,8 @@ if [ "$1" == "53" ] || [ "$1" == "54" ];then
       ;;
 
       restart)
-          /Applications/MNPP/init/stop$1
-          /Applications/MNPP/init/start$1
+          /Applications/MNPP/init/php.sh "$1" stop
+          /Applications/MNPP/init/php.sh "$1" start
       ;;
 
       reload)
@@ -187,7 +173,7 @@ else
 
   case "${2}" in
       start|stop|quit|restart|reload|logrotate)
-          /Applications/MNPP/Library/php52/sbin/php-fpm ${2}
+          /Applications/MNPP/Library/php$1/sbin/php-fpm ${2}
           ;;
       *)
         __show_usage

@@ -16,6 +16,7 @@ __checkconfig( ) {
 }
  
 __start( ) {
+
  
   [ -r ${NGINX_CONF} ] || exit 1 
  
