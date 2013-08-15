@@ -278,7 +278,7 @@ __php_54( ){
 			--enable-fpm \
 			--with-fpm-conf=$MNPP/conf/php54/php-fpm \
 			--with-fpm-log=$MNPP/logs/php54/php-fpm.log \
-			--with-fpm-pid=$MNPP/run/php54-php-fpm.pid \			
+			--with-fpm-pid=$MNPP/run/php54-php-fpm.pid \
 			--with-fpm-user=www \
 			--with-fpm-group=www \
 			--with-libedit \
@@ -333,8 +333,9 @@ __php_53( ) {
 			--enable-fpm \
 			--with-fpm-conf=$MNPP/conf/php53/php-fpm \
 			--with-fpm-log=$MNPP/logs/php53/php-fpm.log \
-			--with-fpm-pid=$MNPP/run/php53-php-fpm.pid \			
-			--with-fpm-user=www --with-fpm-group=www --with-libedit --enable-libxml \
+			--with-fpm-pid=$MNPP/run/php53-php-fpm.pid \
+			--with-fpm-user=www --with-fpm-group=www \
+			--with-libedit --enable-libxml \
 			--enable-dom --enable-simplexml --with-iconv=$MNPP/Library/iconv \
 			--with-pdo-mysql=$MNPP/Library/mysql/bin/mysql_config \
 			--enable-soap
