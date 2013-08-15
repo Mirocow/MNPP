@@ -8,16 +8,11 @@
 #              any size, especially busier sites.
 # processname: php-fpm
 
-if [ "$1" == "52" ];then
-  php_fpm_CONF=/Applications/MNPP/conf/php52/php-fmp
-else
-  php_fpm_CONF=/Applications/MNPP/conf/php$1/php-fpm.conf
-fi
-
+php_fpm_CONF=/Applications/MNPP/conf/php$1/php-fpm.conf
 prefix=/Applications/MNPP/Library/php$1
 exec_prefix=${prefix} 
 php_fpm_BIN=${exec_prefix}/sbin/php-fpm
-php_fpm_PID=/Applications/MNPP/run/php$1/php-fpm.pid
+php_fpm_PID=/Applications/MNPP/run/php$1-php-fpm.pid
 
 php_opts="--fpm-config $php_fpm_CONF"
  
@@ -63,7 +58,7 @@ __export_library( ){
 
 __show_usage( ) {
  
-  echo "Usage: ${0} {54|53|52} {start|stop|quit|restart|reload|logrotate}"
+  echo "Usage: ${0} {55|54|53|52} {start|stop|quit|restart|reload|logrotate}"
   exit 1
 }
 
@@ -81,7 +76,7 @@ if [ "$1" == "53" ] || [ "$1" == "54" ];then
   
   case "$2" in
       start)
-          echo -n "Starting php-fpm "
+          echo "Starting php-fpm "
           $php_fpm_BIN $php_opts
 
           if [ "$?" != 0 ] ; then

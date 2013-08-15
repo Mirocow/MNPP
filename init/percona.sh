@@ -8,7 +8,10 @@ __show_usage( ) {
   exit 3
 }
 
-__set_privilegies( ) { 
+__set_privilegies( ) {
+  if [ ! -d /Applications/MNPP/run/mysql ]; then
+    mkdir /Applications/MNPP/run/mysql
+  fi  
    sudo chown -R mysql:mysql /Applications/MNPP/run/mysql
    sudo chown -R mysql:mysql /Applications/MNPP/Library/mysql
    sudo chmod -R 755 /Applications/MNPP/Library/mysql/*
