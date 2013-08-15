@@ -20,6 +20,10 @@ __initialize( ){
 		mkdir $MNPP/Library
 	fi
 
+	if [ ! -d $MNPP/Library/lib ]; then
+		mkdir $MNPP/Library/lib
+	fi	
+
 	if [ ! -d $MNPP/tmp ]; then
 		mkdir $MNPP/tmp
 	fi	
@@ -222,7 +226,7 @@ __percona( ){
 			--ldata=$MNPP/Library/mysql/var/ \
 			--basedir=$MNPP/Library/mysql
 
-		ln -s $MNPP/Library/mysql/lib/libmysqlclient.18.dylib $MNPP/Library/lib
+		ln -s $MNPP/Library/mysql/lib/libmysqlclient.18.dylib $MNPP/Library/lib/libmysqlclient.18.dylib
 	fi
 }
 
